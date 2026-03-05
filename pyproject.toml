@@ -56,3 +56,4 @@ select = ["E", "F", "I", "B", "UP", "SIM", "C4"]
 python_version = "3.11"
 strict = true
 warn_unused_configs = true
+exclude = "(^build/|^dist/|\\.egg-info/|^\\.venv/|^\\.mypy_cache/)"

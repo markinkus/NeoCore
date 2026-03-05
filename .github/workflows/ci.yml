@@ -30,4 +30,4 @@ jobs:
         run: python -m ruff check .
 
       - name: Run mypy (strict)
-        run: python -m mypy --strict .
+        run: python -m mypy --strict neocore tests examples scripts
