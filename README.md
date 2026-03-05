@@ -88,7 +88,7 @@ print(ledger.get_balance("cash"))
 | NeoCore | Enforceable invariants, typed APIs, and cross-store testability (memory and SQLite). |
 
 ## Roadmap
-- [x] v0.1.0 - Kernel + templates + payment rail scenario
+- [x] v0.1.0 - Base + Kernel + templates + payment rail scenario
 - [~] v0.2.0 - SQLiteStore + durable idempotency persistence (partially complete)
 - [ ] v0.3.0 - Postgres store
 - [ ] v0.4.0 - ISO20022 adapters
