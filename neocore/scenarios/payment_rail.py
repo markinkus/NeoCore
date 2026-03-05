@@ -3,13 +3,14 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from decimal import Decimal
 from itertools import count
 from typing import ClassVar
 
 from neocore.invariants import OverdraftPolicy
 from neocore.ledger.engine import LedgerEngine, PostingInstruction
 from neocore.ledger.models import AccountType, EntryType, Transaction
-from neocore.ledger.store import LedgerStore
+from neocore.ledger.store import LedgerStore, MemoryStore
 from neocore.money import Money
 from neocore.templates.engine import TemplateEngine
 from neocore.templates.registry import DEFAULT_REGISTRY
@@ -232,4 +233,30 @@ class PaymentRailScenario:
         }
 
 
-__all__ = ["PaymentRailScenario"]
+def run_demo() -> str:
+    """Run the reference happy-path scenario and return a printable report."""
+
+    scenario = PaymentRailScenario(MemoryStore())
+    balances = scenario.run_happy_path(
+        amount=Money(Decimal("100.00"), "EUR"),
+        fee=Money(Decimal("1.00"), "EUR"),
+    )
+    ordered_accounts = ("customer", "clearing", "merchant", "bank", "fees")
+    lines = ["NeoCore Payment Rail Demo", "happy_path(authorize=100, capture=100, settle fee=1)"]
+    for account in ordered_accounts:
+        lines.append(f"{account:>8}: {balances[account]}")
+    return "\n".join(lines)
+
+
+def main() -> int:
+    """CLI entrypoint used by `python -m neocore.scenarios.payment_rail`."""
+
+    print(run_demo())
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+
+
+__all__ = ["PaymentRailScenario", "main", "run_demo"]

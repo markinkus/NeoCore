@@ -5,10 +5,30 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "neocore"
 version = "0.1.0"
-description = "NeoCore ledger kernel"
+description = "A strict, append-only, Decimal-only ledger kernel for financial systems."
 readme = "README.md"
 requires-python = ">=3.11"
+license = { text = "MIT" }
 dependencies = []
+keywords = ["ledger", "double-entry", "fintech", "accounting", "idempotency"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Topic :: Office/Business :: Financial :: Accounting",
+  "Typing :: Typed",
+]
+
+[project.urls]
+Homepage = "https://github.com/markinkus/NeoCore"
+Repository = "https://github.com/markinkus/NeoCore"
+Issues = "https://github.com/markinkus/NeoCore/issues"
+Changelog = "https://github.com/markinkus/NeoCore/blob/main/CHANGELOG.md"
+
+[project.scripts]
+neocore-payment-rail = "neocore.scenarios.payment_rail:main"
 
 [project.optional-dependencies]
 dev = [

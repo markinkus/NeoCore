@@ -1,0 +1,18 @@
+name: Docs task
+description: Improve or add documentation
+labels: ["documentation", "good first issue"]
+body:
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: Which page/file should change?
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: What should be true when this task is complete?
+    validations:
+      required: true

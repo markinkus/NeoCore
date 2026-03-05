@@ -1,33 +1,53 @@
 # NeoCore
-NeoCore è un **ledger kernel**: un motore contabile **double-entry**, **append-only**, **Decimal-only** e **idempotente** per sistemi finanziari.
-Non è un core banking completo: è la parte che non vuoi sbagliare quando costruisci wallet, PSP, marketplace, e-money o accounting interno.
+[![CI](https://github.com/markinkus/NeoCore/actions/workflows/ci.yml/badge.svg)](https://github.com/markinkus/NeoCore/actions/workflows/ci.yml)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-## A cosa serve?
-NeoCore serve a garantire che la contabilità del tuo prodotto finanziario sia corretta e auditabile:
-double-entry, append-only, Decimal-only e idempotenza.
-È il motore contabile su cui costruisci API, auth e workflow senza reinventare la parte più critica.
+NeoCore e' un ledger kernel: motore contabile double-entry, append-only, Decimal-only e idempotente per sistemi finanziari.
 
-## What NeoCore is
-- **Double-entry**: ogni transazione deve bilanciare DEBIT == CREDIT (per valuta).
-- **Append-only**: niente UPDATE/DELETE sul ledger. Le correzioni sono nuove transazioni.
-- **Idempotente**: eventi duplicati (retry webhook/polling) non duplicano scritture.
-- **Decimal-only**: vietati float. Armonizza rounding per valuta e per tipo operazione.
-- **Posting templates**: struttura bancaria per flussi standard (payment rail authorize/capture/settle/reverse).
+Non e' un core banking completo: niente layer HTTP, niente auth/IAM, niente orchestrazione di integrazioni esterne.
 
-## What NeoCore is NOT
-- Non è un framework web (niente HTTP, routing, versioning API).
-- Non include auth/authz, multi-tenant, ruoli o IAM.
-- Non è un orchestratore di workflow o integrazioni esterne.
-- Non è “un sostituto di COBOL”: è un kernel affidabile da integrare in architetture moderne.
+## Invariants
+- `no float`: ogni importo usa `Decimal`, input `float` rifiutati ([tests/test_money.py](tests/test_money.py)).
+- `always balanced`: ogni transazione bilancia `DEBIT == CREDIT` per currency ([tests/test_ledger/test_engine.py](tests/test_ledger/test_engine.py)).
+- `append-only`: nessun update/delete di entries/transazioni ([tests/test_ledger/test_store.py](tests/test_ledger/test_store.py)).
+- `idempotent post`: stessa idempotency key, stessa transaction, zero side effects ([tests/test_ledger/test_engine.py](tests/test_ledger/test_engine.py)).
+- `currency-consistent`: account e amount devono condividere currency ([tests/test_invariants.py](tests/test_invariants.py)).
 
 ## Install
-Runtime (nessuna dipendenza obbligatoria oltre alla stdlib):
+Runtime (solo stdlib):
 ```bash
 python3.11 -m pip install .
-python3.11 -m pip install pytest ruff mypy
 ```
 
-## Minimal Example
+Dev setup:
+```bash
+python3.11 -m pip install ".[dev]"
+```
+
+## 20-second demo
+Esegui una demo end-to-end del payment rail:
+```bash
+python3.11 -m neocore.scenarios.payment_rail
+```
+
+Alternativa:
+```bash
+python3.11 examples/payment_rail.py
+```
+
+Output esempio:
+```text
+NeoCore Payment Rail Demo
+happy_path(authorize=100, capture=100, settle fee=1)
+customer: Money(0.00 EUR)
+clearing: Money(0.00 EUR)
+merchant: Money(0.00 EUR)
+    bank: Money(-1.00 EUR)
+    fees: Money(1.00 EUR)
+```
+
+## Minimal example
 ```python
 from decimal import Decimal
 from neocore.invariants import OverdraftPolicy
@@ -43,31 +63,26 @@ ledger.post(idempotency_key="ex-1", description="seed", entries=[
     PostingInstruction("cash", EntryType.DEBIT, Money(Decimal("10.00"), "EUR")),
     PostingInstruction("bank", EntryType.CREDIT, Money(Decimal("10.00"), "EUR")),
 ], metadata={}, overdraft_policy=OverdraftPolicy.allow_overdraft())
-
 print(ledger.get_balance("cash"))
 ```
 
-Output atteso:
-```text
-Money(10.00 EUR)
-```
+## Why NeoCore
+- `beancount` / `django-ledger`: ottimi per accounting, NeoCore e' transaction kernel + posting templates + payment rail scenario.
+- `Apache Fineract` (e piattaforme simili): piattaforme complete; NeoCore e' un kernel integrabile, piccolo e composabile.
+- Focus NeoCore: invariants forti + API Python typed + testability cross-store (memory/sqlite).
 
-## Payment Rail Demo
-```python
-from decimal import Decimal
-from neocore.ledger.store import MemoryStore
-from neocore.money import Money
-from neocore.scenarios.payment_rail import PaymentRailScenario
+## Roadmap
+- [x] v0.1.0 - Kernel + templates + payment rail scenario
+- [~] v0.2.0 - SQLiteStore + idempotency persistence (parzialmente completa)
+- [ ] v0.3.0 - Postgres store
+- [ ] v0.4.0 - ISO20022 adapters
 
-scenario = PaymentRailScenario(MemoryStore())
-result = scenario.run_happy_path(
-    amount=Money(Decimal("100.00"), "EUR"),
-    fee=Money(Decimal("1.00"), "EUR"),
-)
-print(result["fees"], result["clearing"])  # fee contabilizzata, clearing chiuso
-```
+## Docs
+- [Double-entry in 3 minutes](docs/double-entry-in-3-minutes.md)
+- [Idempotency and retry](docs/idempotency-and-retry.md)
+- [Posting templates and payment rail](docs/posting-templates-and-payment-rail.md)
 
-## Decision Log
+## Decision log
 - [001 - Why Decimal](docs/decisions/001-why-decimal.md)
 - [002 - Why Append-Only](docs/decisions/002-why-append-only.md)
 - [003 - Why Templates](docs/decisions/003-why-templates.md)

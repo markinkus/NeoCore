@@ -1,0 +1,10 @@
+site_name: NeoCore Docs
+site_description: NeoCore ledger kernel documentation
+repo_url: https://github.com/markinkus/NeoCore
+nav:
+  - Home: docs/index.md
+  - Double-entry in 3 minutes: docs/double-entry-in-3-minutes.md
+  - Idempotency and retry: docs/idempotency-and-retry.md
+  - Posting templates and payment rail: docs/posting-templates-and-payment-rail.md
+theme:
+  name: mkdocs

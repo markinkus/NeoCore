@@ -10,7 +10,7 @@ import pytest
 from neocore.exceptions import InsufficientFundsError
 from neocore.ledger.store import LedgerStore, MemoryStore, SQLiteStore
 from neocore.money import Money
-from neocore.scenarios.payment_rail import PaymentRailScenario
+from neocore.scenarios.payment_rail import PaymentRailScenario, main, run_demo
 
 
 @pytest.fixture(params=["memory", "sqlite"])
@@ -76,3 +76,18 @@ def test_payment_rail_insufficient_funds(scenario: PaymentRailScenario) -> None:
 
     assert exc.value.available == Decimal("500.00")
     assert exc.value.required == Decimal("1000.00")
+
+
+def test_run_demo_returns_readable_report() -> None:
+    report = run_demo()
+    assert "NeoCore Payment Rail Demo" in report
+    assert "customer" in report
+    assert "fees" in report
+    assert "Money(1.00 EUR)" in report
+
+
+def test_main_prints_demo_report(capsys: pytest.CaptureFixture[str]) -> None:
+    exit_code = main()
+    captured = capsys.readouterr()
+    assert exit_code == 0
+    assert "NeoCore Payment Rail Demo" in captured.out

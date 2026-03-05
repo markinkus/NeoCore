@@ -2,4 +2,6 @@
 
 from neocore.money import Money
 
-__all__ = ["Money"]
+__version__ = "0.1.0"
+
+__all__ = ["Money", "__version__"]
